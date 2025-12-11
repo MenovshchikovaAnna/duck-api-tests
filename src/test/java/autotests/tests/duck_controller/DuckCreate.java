@@ -3,48 +3,97 @@ package autotests.tests.duck_controller;
 import autotests.clients.DuckActionsClient;
 import autotests.payloads.BodyCreateDuck;
 import com.consol.citrus.TestCaseRunner;
+import com.consol.citrus.actions.AbstractTestAction;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
+import com.consol.citrus.context.TestContext;
+import com.consol.citrus.testng.CitrusParameters;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
-import static com.consol.citrus.dsl.JsonPathSupport.jsonPath;
 import static com.consol.citrus.http.actions.HttpActionBuilder.http;
+import static com.consol.citrus.validation.DelegatingPayloadVariableExtractor.Builder.fromBody;
 
+@Epic("Тесты на duck-controller")
+@Feature("Параметризированное создание уточки")
+@Story("Эндпоинт /api/duck/create")
 public class DuckCreate extends DuckActionsClient {
+    BodyCreateDuck duckProperties1 = new BodyCreateDuck() {{
+        setColor("yellow");
+        setHeight(0.08);
+        setMaterial("plastic");
+        setSound("crya");
+        setWingsState(WingsState.ACTIVE);
+    }};
+    BodyCreateDuck duckProperties2 = new BodyCreateDuck() {{
+        setColor("green");
+        setHeight(0.05);
+        setMaterial("wood");
+        setSound("quack-quack");
+        setWingsState(WingsState.FIXED);
+    }};
+    BodyCreateDuck duckProperties3 = new BodyCreateDuck() {{
+        setColor("red");
+        setHeight(0.60);
+        setMaterial("rubber");
+        setSound("woof");
+        setWingsState(WingsState.UNDEFINED);
+    }};
+    BodyCreateDuck duckProperties4 = new BodyCreateDuck() {{
+        setColor("blue");
+        setHeight(0.09);
+        setMaterial("foam");
+        setSound("moo");
+        setWingsState(WingsState.ACTIVE);
+    }};
+    BodyCreateDuck duckProperties5 = new BodyCreateDuck() {{
+        setColor("black");
+        setHeight(0.12);
+        setMaterial("iron");
+        setSound("quack");
+        setWingsState(WingsState.FIXED);
+    }};
 
-    @Test(description = "Проверка создания уточки с материалом rubber")
+    @Test(dataProvider = "duckList", description = "Проверка создания уточки")
     @CitrusTest
-    public void createDuckMaterialRubber(@Optional @CitrusResource TestCaseRunner runner) {
-        BodyCreateDuck duckProperties = new BodyCreateDuck();
-        duckProperties.setColor("yellow");
-        duckProperties.setHeight(0.03);
-        duckProperties.setMaterial("rubber");
-        duckProperties.setSound("quack");
-        duckProperties.setWingsState(BodyCreateDuck.WingsState.ACTIVE);
+    @CitrusParameters({"payload", "response", "runner"})
+    public void successfulCreateDuck(BodyCreateDuck payload, String response, @Optional @CitrusResource TestCaseRunner runner) {
+        createDuck(runner, payload);
+        String idDuck = validateResponseCreate(runner, response);
 
-        createDuck(runner, duckProperties);
-        validateResponse(runner, "yellow", 0.03, "rubber", "quack", "ACTIVE");
+        deleteFromTable(runner,
+                "DUCK",
+                "ID = " + idDuck);
+
+        selectCheckingDuckById(runner,
+                idDuck,
+                payload.getColor(),
+                payload.getHeight(),
+                payload.getMaterial(),
+                payload.getSound(),
+                payload.getWingsState().name());
     }
 
-    @Test(description = "Проверка создания уточки с материалом wood")
-    @CitrusTest
-    public void createDuckMaterialWood(@Optional @CitrusResource TestCaseRunner runner) {
-        BodyCreateDuck duckProperties = new BodyCreateDuck();
-        duckProperties.setColor("yellow");
-        duckProperties.setHeight(0.03);
-        duckProperties.setMaterial("wood");
-        duckProperties.setSound("quack");
-        duckProperties.setWingsState(BodyCreateDuck.WingsState.ACTIVE);
-
-        createDuck(runner, duckProperties);
-        validateResponse(runner, "yellow", 0.03, "wood", "quack", "ACTIVE");
+    @DataProvider(name = "duckList")
+    public Object[][] DuckProvider() {
+        return new Object[][]{
+                {duckProperties1, "DuckActionsTest/getDuckCreateTest/duckYellowCreate.json", null},
+                {duckProperties2, "DuckActionsTest/getDuckCreateTest/duckGreenCreate.json", null},
+                {duckProperties3, "DuckActionsTest/getDuckCreateTest/duckRedCreate.json", null},
+                {duckProperties4, "DuckActionsTest/getDuckCreateTest/duckBlueCreate.json", null},
+                {duckProperties5, "DuckActionsTest/getDuckCreateTest/duckBlackCreate.json", null}
+        };
     }
 
-    //валидация ответа для create (отличается от остальных, поэтому отдельно и private)
-    private void validateResponse(TestCaseRunner runner, String expectedColor, double expectedHeight, String expectedMaterial, String expectedSound, String expectedWingsState) {
+    //валидация ответа отличается от остальных, поэтому отдельно и private
+    private String validateResponseCreate(TestCaseRunner runner, String response) {
         runner.$(
                 http()
                         .client(duckService)
@@ -52,12 +101,17 @@ public class DuckCreate extends DuckActionsClient {
                         .response(HttpStatus.OK)
                         .message()
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .validate(jsonPath()
-                                .expression("$.id", "@isNumber()@")
-                                .expression("$.color", expectedColor)
-                                .expression("$.height", String.valueOf(expectedHeight))
-                                .expression("$.material", expectedMaterial)
-                                .expression("$.sound", expectedSound)
-                                .expression("$.wingsState", expectedWingsState)));
+                        .body(new ClassPathResource(response))
+                        .extract(fromBody().expression("$.id", "idDuck")));
+
+        final String[] idValue = new String[1];
+        runner.run(new AbstractTestAction() {
+            @Override
+            public void doExecute(TestContext context) {
+                idValue[0] = context.getVariable("idDuck");
+            }
+        });
+
+        return idValue[0];
     }
 }
