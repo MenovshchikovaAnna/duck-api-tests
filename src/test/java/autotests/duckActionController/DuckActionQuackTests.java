@@ -1,4 +1,4 @@
-package autotests.duck_action_controller;
+package autotests.duckActionController;
 
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.actions.AbstractTestAction;
@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 import static com.consol.citrus.validation.DelegatingPayloadVariableExtractor.Builder.fromBody;
 
-public class DuckActionQuack extends TestNGCitrusSpringSupport {
+public class DuckActionQuackTests extends TestNGCitrusSpringSupport {
     String url = "http://localhost:2222";
     String idDuck;
     String[] parametersIdSound = new String[2];

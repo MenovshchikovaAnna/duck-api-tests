@@ -1,4 +1,4 @@
-package autotests.duck_action_controller;
+package autotests.duckActionController;
 
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 import static com.consol.citrus.validation.DelegatingPayloadVariableExtractor.Builder.fromBody;
 
-public class DuckActionFly extends TestNGCitrusSpringSupport {
+public class DuckActionFlyTests extends TestNGCitrusSpringSupport {
     String url = "http://localhost:2222";
 
     @Test(description = "Проверка полета уточки с крыльями Active")

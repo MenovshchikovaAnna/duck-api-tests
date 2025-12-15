@@ -1,4 +1,4 @@
-package autotests.duck_controller;
+package autotests.duckController;
 
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 import static com.consol.citrus.validation.DelegatingPayloadVariableExtractor.Builder.fromBody;
 
-public class DuckUpdate extends TestNGCitrusSpringSupport {
+public class DuckUpdateTests extends TestNGCitrusSpringSupport {
     String url = "http://localhost:2222";
     String idDuck;
 

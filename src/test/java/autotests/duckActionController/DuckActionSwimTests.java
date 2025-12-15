@@ -1,4 +1,4 @@
-package autotests.duck_controller;
+package autotests.duckActionController;
 
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
@@ -12,18 +12,25 @@ import org.testng.annotations.Test;
 import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 import static com.consol.citrus.validation.DelegatingPayloadVariableExtractor.Builder.fromBody;
 
-public class DuckDelete extends TestNGCitrusSpringSupport {
+public class DuckActionSwimTests extends TestNGCitrusSpringSupport {
     String url = "http://localhost:2222";
 
-    @Test(description = "Проверка удаления уточки")
+    @Test(description = "Проверка плаванья уточки с существующим id")
     @CitrusTest
-    public void successDeleteDuck(@Optional @CitrusResource TestCaseRunner runner) {
+    public void successSwim(@Optional @CitrusResource TestCaseRunner runner) {
         createDuck(runner, "yellow", 0.03, "rubber", "quack", "ACTIVE");
-        deleteDuck(runner, getIdCreatedDuck(runner));
-        validateResponseActiveWingsFly(runner, "{\n \"message\": \"Duck is deleted\"\n}");
+        duckSwim(runner, getIdCreatedDuck(runner));
+        validateResponseSuccessSwim(runner, "{\n \"message\": \"I'm swimming\"\n}");
     }
 
-    //создание уточки
+    @Test(description = "Проверка плаванья уточки с несуществующим id")
+    @CitrusTest
+    public void invalidIdSwim(@Optional @CitrusResource TestCaseRunner runner) {
+        duckSwim(runner, "999999");
+        validateResponseInvalidIdSwim(runner, "{\n \"message\": \"Paws are not found ((((\"\n}");
+    }
+
+    //Создание уточки
     public void createDuck(TestCaseRunner runner, String color, double height, String material, String sound, String wingsState) {
         runner.$(
                 http()
@@ -54,18 +61,30 @@ public class DuckDelete extends TestNGCitrusSpringSupport {
         return "${duckId}";
     }
 
-    //Удаление уточки
-    public void deleteDuck(TestCaseRunner runner, String idDuck) {
+    //Запрос - плыть
+    public void duckSwim(TestCaseRunner runner, String id) {
         runner.$(
                 http()
                         .client(url)
                         .send()
-                        .delete("/api/duck/delete")
-                        .queryParam("id", idDuck));
+                        .get("/api/duck/action/swim")
+                        .queryParam("id", id));
     }
 
-    //валидация ответа
-    public void validateResponseActiveWingsFly(TestCaseRunner runner, String responseMessage) {
+    //Валидация ответа с несуществующим id
+    public void validateResponseInvalidIdSwim(TestCaseRunner runner, String responseMessage) {
+        runner.$(
+                http()
+                        .client(url)
+                        .receive()
+                        .response(HttpStatus.NOT_FOUND)
+                        .message()
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .body(responseMessage));
+    }
+
+    //Валидация ответа с существующим id
+    public void validateResponseSuccessSwim(TestCaseRunner runner, String responseMessage) {
         runner.$(
                 http()
                         .client(url)

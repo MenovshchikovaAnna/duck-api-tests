@@ -1,4 +1,4 @@
-package autotests.duck_controller;
+package autotests.duckController;
 
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 import static com.consol.citrus.validation.json.JsonPathMessageValidationContext.Builder.jsonPath;
 
-public class DuckCreate extends TestNGCitrusSpringSupport {
+public class DuckCreateTests extends TestNGCitrusSpringSupport {
     String url = "http://localhost:2222";
 
     @Test(description = "Проверка создания уточки с материалом rubber")
