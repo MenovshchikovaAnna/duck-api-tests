@@ -1,4 +1,4 @@
-package autotests.tests.duck_action_controller;
+package autotests.tests.duckActionController;
 
 import autotests.clients.DuckActionsClient;
 import autotests.payloads.BodyCreateDuck;
@@ -16,47 +16,64 @@ import org.testng.annotations.Test;
 @Epic("Тесты на duck-actions-controller")
 @Feature("Полет уточки")
 @Story("Эндпоинт /api/duck/action/fly")
-public class DuckActionFly extends DuckActionsClient {
-    BodyCreateDuck duckProperties = new BodyCreateDuck() {{
-        setColor("yellow");
-        setHeight(0.03);
-        setMaterial("rubber");
-        setSound("quack");
-    }};
-
-    ResponseMessageDuck expectedResponse = new ResponseMessageDuck();
-
+public class DuckActionFlyTests extends DuckActionsClient {
     @Test(description = "Проверка полета уточки с крыльями Active")
     @CitrusTest
     public void activeWingsFly(@Optional @CitrusResource TestCaseRunner runner) {
-        duckProperties.setWingsState(BodyCreateDuck.WingsState.ACTIVE);
+        BodyCreateDuck duckProperties = new BodyCreateDuck()
+                .color("yellow")
+                .height(0.03)
+                .material("rubber")
+                .sound("quack")
+                .wingsState(BodyCreateDuck.WingsState.ACTIVE);
+
         String idDuck = "1234567";
         createDuckWithDatabase(runner, duckProperties, idDuck);
         duckFly(runner, idDuck);
-        expectedResponse.setMessage("I am flying :)");
+
+        ResponseMessageDuck expectedResponse = new ResponseMessageDuck()
+                .message("I am flying :)");
+
         validateResponsePayload(runner, HttpStatus.OK, expectedResponse);
     }
 
     @Test(description = "Проверка полета уточки с крыльями Fixed")
     @CitrusTest
     public void fixedWingsFly(@Optional @CitrusResource TestCaseRunner runner) {
-        duckProperties.setWingsState(BodyCreateDuck.WingsState.FIXED);
+        BodyCreateDuck duckProperties = new BodyCreateDuck()
+                .color("yellow")
+                .height(0.03)
+                .material("rubber")
+                .sound("quack")
+                .wingsState(BodyCreateDuck.WingsState.FIXED);
+
         String idDuck = "1234567";
         createDuckWithDatabase(runner, duckProperties, idDuck);
         duckFly(runner, idDuck);
-        expectedResponse.setMessage("I can not fly :C");
+
+        ResponseMessageDuck expectedResponse = new ResponseMessageDuck()
+                .message("I can not fly :C");
+
         validateResponsePayload(runner, HttpStatus.OK, expectedResponse);
     }
 
     @Test(description = "Проверка полета уточки с крыльями Undefined")
     @CitrusTest
-
     public void undefinedWingsFly(@Optional @CitrusResource TestCaseRunner runner) {
-        duckProperties.setWingsState(BodyCreateDuck.WingsState.UNDEFINED);
+        BodyCreateDuck duckProperties = new BodyCreateDuck()
+                .color("yellow")
+                .height(0.03)
+                .material("rubber")
+                .sound("quack")
+                .wingsState(BodyCreateDuck.WingsState.UNDEFINED);
+
         String idDuck = "1234567";
         createDuckWithDatabase(runner, duckProperties, idDuck);
         duckFly(runner, idDuck);
-        expectedResponse.setMessage("Wings are not detected :(");
+
+        ResponseMessageDuck expectedResponse = new ResponseMessageDuck()
+                .message("Wings are not detected :(");
+
         validateResponsePayload(runner, HttpStatus.OK, expectedResponse);
     }
 }

@@ -1,4 +1,4 @@
-package autotests.tests;
+package autotests;
 
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.http.actions.HttpClientRequestActionBuilder;
@@ -11,6 +11,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.test.context.ContextConfiguration;
+
+import java.util.Map;
 
 import static com.consol.citrus.actions.ExecuteSQLAction.Builder.sql;
 import static com.consol.citrus.container.FinallySequence.Builder.doFinally;
@@ -29,21 +31,14 @@ public class BaseTest extends TestNGCitrusSpringSupport {
                 .statement(sql));
     }
 
-    protected void getRequest(TestCaseRunner runner, HttpClient url, String path, Object... queryParams) {
-        if (queryParams.length % 2 != 0) {
-            throw new IllegalArgumentException("Query параметров должно быть четное количество");
-        }
-
+    protected void getRequest(TestCaseRunner runner, HttpClient url, String path, Map<String, Object> queryParams) {
         HttpClientRequestActionBuilder builder = http()
                 .client(url)
                 .send()
                 .get(path);
 
-        for (int i = 0; i < queryParams.length; i += 2) {
-            builder.queryParam(
-                    queryParams[i].toString(),
-                    queryParams[i + 1].toString()
-            );
+        for (Map.Entry <String, Object> qp : queryParams.entrySet()) {
+            builder.queryParam(qp.getKey(), qp.getValue().toString());
         }
 
         runner.$(builder);

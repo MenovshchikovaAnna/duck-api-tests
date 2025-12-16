@@ -1,4 +1,4 @@
-package autotests.tests.duck_controller;
+package autotests.tests.duckController;
 
 import autotests.clients.DuckActionsClient;
 import autotests.payloads.BodyCreateDuck;
@@ -13,26 +13,20 @@ import org.springframework.http.HttpStatus;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
-import static com.consol.citrus.actions.EchoAction.Builder.echo;
-import static com.consol.citrus.actions.ExecuteSQLQueryAction.Builder.query;
-
 @Epic("Тесты на duck-controller")
 @Feature("Обновление характеристик уточки")
 @Story("Эндпоинт /api/duck/update")
-public class DuckUpdate extends DuckActionsClient {
-    BodyCreateDuck duckProperties = new BodyCreateDuck() {{
-        setColor("yellow");
-        setHeight(0.03);
-        setMaterial("rubber");
-        setSound("quack");
-        setWingsState(BodyCreateDuck.WingsState.ACTIVE);
-    }};
-
-    ResponseMessageDuck expectedResponse = new ResponseMessageDuck();
-
+public class DuckUpdateTests extends DuckActionsClient {
     @Test(description = "Проверка изменения параметров уточки (color и height)")
     @CitrusTest
     public void updateDuckParametersColorHeight(@Optional @CitrusResource TestCaseRunner runner) {
+        BodyCreateDuck duckProperties = new BodyCreateDuck()
+                .color("yellow")
+                .height(0.03)
+                .material("rubber")
+                .sound("quack")
+                .wingsState(BodyCreateDuck.WingsState.ACTIVE);
+
         String idDuck = "1234567";
 
         createDuckWithDatabase(runner, duckProperties, idDuck);
@@ -41,25 +35,33 @@ public class DuckUpdate extends DuckActionsClient {
                 idDuck,
                 "red",
                 0.05,
-                duckProperties.getMaterial(),
-                duckProperties.getSound(),
-                duckProperties.getWingsState().name());
+                duckProperties.material(),
+                duckProperties.sound(),
+                duckProperties.wingsState().name());
 
-        expectedResponse.setMessage("Duck with id = " + idDuck + " is updated");
+        ResponseMessageDuck expectedResponse = new ResponseMessageDuck()
+                .message("Duck with id = " + idDuck + " is updated");
         validateResponsePayload(runner, HttpStatus.OK, expectedResponse);
 
         selectCheckingDuckById(runner,
                 idDuck,
                 "red",
                 0.05,
-                duckProperties.getMaterial(),
-                duckProperties.getSound(),
-                duckProperties.getWingsState().name());
+                duckProperties.material(),
+                duckProperties.sound(),
+                duckProperties.wingsState().name());
     }
 
     @Test(description = "Проверка изменения параметров уточки (color и sound)")
     @CitrusTest
     public void updateDuckParametersColorSound(@Optional @CitrusResource TestCaseRunner runner) {
+        BodyCreateDuck duckProperties = new BodyCreateDuck()
+                .color("yellow")
+                .height(0.03)
+                .material("rubber")
+                .sound("quack")
+                .wingsState(BodyCreateDuck.WingsState.ACTIVE);
+
         String idDuck = "1234567";
 
         createDuckWithDatabase(runner, duckProperties, idDuck);
@@ -67,20 +69,22 @@ public class DuckUpdate extends DuckActionsClient {
         updateDuck(runner,
                 idDuck,
                 "blue",
-                duckProperties.getHeight(),
-                duckProperties.getMaterial(),
+                duckProperties.height(),
+                duckProperties.material(),
                 "quack-quack",
-                duckProperties.getWingsState().name());
+                duckProperties.wingsState().name());
 
-        expectedResponse.setMessage("Duck with id = " + idDuck + " is updated");
+        ResponseMessageDuck expectedResponse = new ResponseMessageDuck()
+                .message("Duck with id = " + idDuck + " is updated");
         validateResponsePayload(runner, HttpStatus.OK, expectedResponse);
 
         selectCheckingDuckById(runner,
                 idDuck,
                 "blue",
-                duckProperties.getHeight(),
-                duckProperties.getMaterial(),
+                duckProperties.height(),
+                duckProperties.material(),
                 "quack-quack",
-                duckProperties.getWingsState().name());
+                duckProperties.wingsState().name());
+
     }
 }

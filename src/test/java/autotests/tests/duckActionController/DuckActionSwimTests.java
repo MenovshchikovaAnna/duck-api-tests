@@ -1,4 +1,4 @@
-package autotests.tests.duck_action_controller;
+package autotests.tests.duckActionController;
 
 import autotests.clients.DuckActionsClient;
 import autotests.payloads.BodyCreateDuck;
@@ -13,23 +13,21 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
 import static com.consol.citrus.actions.EchoAction.Builder.echo;
-import static com.consol.citrus.container.FinallySequence.Builder.doFinally;
 
 @Epic("Тесты на duck-actions-controller")
 @Feature("Плаванье уточки")
 @Story("Эндпоинт /api/duck/action/swim")
-public class DuckActionSwim extends DuckActionsClient {
-    BodyCreateDuck duckProperties = new BodyCreateDuck() {{
-        setColor("yellow");
-        setHeight(0.03);
-        setMaterial("rubber");
-        setSound("quack");
-        setWingsState(BodyCreateDuck.WingsState.ACTIVE);
-    }};
-
+public class DuckActionSwimTests extends DuckActionsClient {
     @Test(description = "Проверка плаванья уточки с существующим id")
     @CitrusTest
     public void successSwim(@Optional @CitrusResource TestCaseRunner runner) {
+        BodyCreateDuck duckProperties = new BodyCreateDuck()
+                .color("yellow")
+                .height(0.03)
+                .material("rubber")
+                .sound("quack")
+                .wingsState(BodyCreateDuck.WingsState.ACTIVE);
+
         String idDuck = "1234567";
         createDuckWithDatabase(runner, duckProperties, idDuck);
         duckSwim(runner, idDuck);

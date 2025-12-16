@@ -1,7 +1,7 @@
 package autotests.clients;
 
 import autotests.payloads.BodyCreateDuck;
-import autotests.tests.BaseTest;
+import autotests.BaseTest;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.message.builder.ObjectMappingPayloadBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,6 +9,9 @@ import io.qameta.allure.Step;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.consol.citrus.actions.EchoAction.Builder.echo;
 import static com.consol.citrus.actions.ExecuteSQLQueryAction.Builder.query;
@@ -26,12 +29,15 @@ public class DuckActionsClient extends BaseTest {
 
     @Step("Заставляем уточку крякать")
     public void quackDuck(TestCaseRunner runner, String idDuck, int repetitionCount, int soundCount) {
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("id", idDuck);
+        queryParams.put("repetitionCount", repetitionCount);
+        queryParams.put("soundCount", soundCount);
+
         getRequest(runner,
                 duckService,
                 "/api/duck/action/quack",
-                "id", idDuck,
-                "repetitionCount", repetitionCount,
-                "soundCount", soundCount);
+                queryParams);
     }
 
     @Step("Обновляем характеристики уточки")
@@ -57,26 +63,35 @@ public class DuckActionsClient extends BaseTest {
 
     @Step("Заставляем уточку плыть")
     public void duckSwim(TestCaseRunner runner, String id) {
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("id", id);
+
         getRequest(runner,
                 duckService,
                 "/api/duck/action/swim",
-                "id", id);
+                queryParams);
     }
 
     @Step("Заставляем уточку лететь")
     public void duckFly(TestCaseRunner runner, String id) {
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("id", id);
+
         getRequest(runner,
                 duckService,
                 "/api/duck/action/fly",
-                "id", id);
+                queryParams);
     }
 
     @Step("Заставляем уточку показать характеристики")
     public void showPropertiesDuck(TestCaseRunner runner, String idDuck) {
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("id", idDuck);
+
         getRequest(runner,
                 duckService,
                 "/api/duck/action/properties",
-                "id", idDuck);
+                queryParams);
     }
 
     //Валидация ответа String
@@ -113,11 +128,11 @@ public class DuckActionsClient extends BaseTest {
                 "ID = " + duckId);
 
         String values = duckId + ", '" +
-                duckProperties.getColor() + "', " +
-                duckProperties.getHeight() + ", '" +
-                duckProperties.getMaterial() + "', '" +
-                duckProperties.getSound() + "', '" +
-                duckProperties.getWingsState().name();
+                duckProperties.color() + "', " +
+                duckProperties.height() + ", '" +
+                duckProperties.material() + "', '" +
+                duckProperties.sound() + "', '" +
+                duckProperties.wingsState().name();
 
         try {
             insertIntoTable(runner,

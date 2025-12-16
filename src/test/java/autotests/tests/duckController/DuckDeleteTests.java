@@ -1,4 +1,4 @@
-package autotests.tests.duck_controller;
+package autotests.tests.duckController;
 
 import autotests.clients.DuckActionsClient;
 import autotests.payloads.BodyCreateDuck;
@@ -16,25 +16,24 @@ import org.testng.annotations.Test;
 @Epic("Тесты на duck-controller")
 @Feature("Удаление уточки")
 @Story("Эндпоинт /api/duck/delete")
-public class DuckDelete extends DuckActionsClient {
-
-    BodyCreateDuck duckProperties = new BodyCreateDuck() {{
-        setColor("yellow");
-        setHeight(0.03);
-        setMaterial("rubber");
-        setSound("quack");
-        setWingsState(BodyCreateDuck.WingsState.ACTIVE);
-    }};
-
-    ResponseMessageDuck expectedResponse = new ResponseMessageDuck();
-
+public class DuckDeleteTests extends DuckActionsClient {
     @Test(description = "Проверка удаления уточки")
     @CitrusTest
     public void successDeleteDuck(@Optional @CitrusResource TestCaseRunner runner) {
+        BodyCreateDuck duckProperties = new BodyCreateDuck()
+                .color("yellow")
+                .height(0.03)
+                .material("rubber")
+                .sound("quack")
+                .wingsState(BodyCreateDuck.WingsState.ACTIVE);
+
         String idDuck = "1234567";
         createDuckWithDatabase(runner, duckProperties, idDuck);
         deleteDuck(runner, idDuck);
-        expectedResponse.setMessage("Duck is deleted");
+
+        ResponseMessageDuck expectedResponse = new ResponseMessageDuck()
+                .message("Duck is deleted");
+
         validateResponsePayload(runner, HttpStatus.OK, expectedResponse);
     }
 }
