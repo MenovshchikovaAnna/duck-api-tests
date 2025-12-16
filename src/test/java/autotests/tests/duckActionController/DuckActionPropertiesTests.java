@@ -1,4 +1,4 @@
-package autotests.tests.duck_action_controller;
+package autotests.tests.duckActionController;
 
 import autotests.clients.DuckActionsClient;
 import autotests.payloads.BodyCreateDuck;
@@ -9,44 +9,40 @@ import org.springframework.http.HttpStatus;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
-public class DuckActionProperties extends DuckActionsClient {
-
+public class DuckActionPropertiesTests extends DuckActionsClient {
     @Test(description = "Проверка отображения характеристик уточки (с четным id)")
     @CitrusTest
     public void showPropertiesDuckEvenId(@Optional @CitrusResource TestCaseRunner runner) {
-
-        BodyCreateDuck duckProperties = new BodyCreateDuck();
-        duckProperties.setColor("yellow");
-        duckProperties.setHeight(0.03); // TODO: SHIFT-AQA-3
-        duckProperties.setMaterial("wood");
-        duckProperties.setSound("quack");
-        duckProperties.setWingsState(BodyCreateDuck.WingsState.ACTIVE);
-
+        BodyCreateDuck duckProperties = new BodyCreateDuck()
+                .color("yellow")
+                .height(0.03) // TODO: SHIFT-AQA-3
+                .material("wood")
+                .sound("quack")
+                .wingsState(BodyCreateDuck.WingsState.ACTIVE);
 
         String idDuckActual = createDuckIdEvenOrOdd(runner, true, duckProperties);
         showPropertiesDuck(runner, idDuckActual);
 
         //Валидация ответа из папки Resources
         // TODO: SHIFT-AQA-2
-        validateResponseResourses(runner, HttpStatus.OK, "DuckActionsTest/validationDuckPropertiesWood.json");
+        validateResponseResourses(runner, HttpStatus.OK, "duckActionsTest/validationDuckPropertiesWood.json");
     }
 
     @Test(description = "Проверка отображения характеристик уточки (с нечетным id)")
     @CitrusTest
     public void showPropertiesDuckOddId(@Optional @CitrusResource TestCaseRunner runner) {
-
-        BodyCreateDuck duckProperties = new BodyCreateDuck();
-        duckProperties.setColor("yellow");
-        duckProperties.setHeight(0.03); // TODO: SHIFT-AQA-3
-        duckProperties.setMaterial("rubber");
-        duckProperties.setSound("quack");
-        duckProperties.setWingsState(BodyCreateDuck.WingsState.ACTIVE);
+        BodyCreateDuck duckProperties = new BodyCreateDuck()
+                .color("yellow")
+                .height(0.03) // TODO: SHIFT-AQA-3
+                .material("rubber")
+                .sound("quack")
+                .wingsState(BodyCreateDuck.WingsState.ACTIVE);
 
         String idDuckActual = createDuckIdEvenOrOdd(runner, false, duckProperties);
         showPropertiesDuck(runner, idDuckActual);
 
         //Валидация ответа из папки Resources
-        validateResponseResourses(runner, HttpStatus.OK, "DuckActionsTest/validationDuckPropertiesRubber.json");
+        validateResponseResourses(runner, HttpStatus.OK, "duckActionsTest/validationDuckPropertiesRubber.json");
     }
 
     //создание записи с необходимым id (четным или нечетным)
@@ -57,7 +53,7 @@ public class DuckActionProperties extends DuckActionsClient {
         do {
             createDuck(runner, duckProperties);
             idDuck = getId(runner);
-        } while (checkIdEven(idDuck) != desiredReminderOfDivision);
+        } while ((Integer.parseInt(idDuck) % 2 == 0) != desiredReminderOfDivision);
 
         return idDuck;
     }

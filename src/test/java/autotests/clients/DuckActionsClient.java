@@ -1,10 +1,8 @@
 package autotests.clients;
 
-import autotests.tests.BaseTest;
-import autotests.tests.EndpointConfig;
+import autotests.BaseTest;
+import autotests.EndpointConfig;
 import com.consol.citrus.TestCaseRunner;
-import com.consol.citrus.actions.AbstractTestAction;
-import com.consol.citrus.context.TestContext;
 import com.consol.citrus.http.client.HttpClient;
 import com.consol.citrus.message.builder.ObjectMappingPayloadBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -150,18 +148,13 @@ public class DuckActionsClient extends BaseTest {
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .extract(fromBody().expression("$.id", "valueId")));
 
-        runner.run(new AbstractTestAction() {
-            @Override
-            public void doExecute(TestContext context) {
-                idValue[0] = context.getVariable("valueId");
-            }
-        });
+        runner.$(context -> idValue[0] = context.getVariable("valueId"));
 
         return idValue[0];
     }
-
+/*
     //Проверка чётности id
     public boolean checkIdEven(String idValue) {
         return Integer.parseInt(idValue) % 2 == 0;
-    }
+    }*/
 }
