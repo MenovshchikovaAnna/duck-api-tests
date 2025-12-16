@@ -16,27 +16,24 @@ import static com.consol.citrus.validation.DelegatingPayloadVariableExtractor.Bu
 
 public class DuckActionQuackTests extends TestNGCitrusSpringSupport {
     String url = "http://localhost:2222";
-    String idDuck;
-    String[] parametersIdSound = new String[2];
 
     @Test(description = "Проверка кряканья утки (корректный нечетный id, корректный звук)")
     @CitrusTest
     public void quackDuckWithEvenId(@Optional @CitrusResource TestCaseRunner runner) {
-        parametersIdSound = createDuckIdEvenOrOdd(runner, false); //Генерация утки; получение параметров id [0] и sound [1]
-        quackDuck(runner, parametersIdSound[0], 2, 3); //Запрос - крякать
-        String expectedMessage = expectedMessage(parametersIdSound[1], 2, 3); //Генерация желаемого тела ответа
+        String parametersIdSound = createDuckIdEvenOrOdd(runner, false); //Генерация утки; получение параметров id [0] и sound [1]
+        quackDuck(runner, parametersIdSound, 2, 3); //Запрос - крякать
         validateResponseActiveWingsFly(runner, "{\n" +
-                "  \"sound\": \"" + expectedMessage + "\"\n}");
+                "  \"sound\": \"quack-quack, quack-quack, quack-quack\"\n}");
     }
 
     @Test(description = "Проверка кряканья утки (корректный четный id, корректный звук)")
     @CitrusTest
     public void quackDuckWithOddId(@Optional @CitrusResource TestCaseRunner runner) {
-        parametersIdSound = createDuckIdEvenOrOdd(runner, true); //Генерация утки; получение параметров id [0] и sound [1]
-        quackDuck(runner, parametersIdSound[0], 2, 3); //Запрос - крякать
-        String expectedMessage = expectedMessage(parametersIdSound[1], 2, 3); //Генерация желаемого тела ответа
+        String parametersIdSound = createDuckIdEvenOrOdd(runner, true); //Генерация утки; получение параметров id [0] и sound [1]
+        quackDuck(runner, parametersIdSound, 2, 3); //Запрос - крякать
+        // TODO: SHIFT-AQA-1
         validateResponseActiveWingsFly(runner, "{\n" +
-                "  \"sound\": \"" + expectedMessage + "\"\n}");
+                "  \"sound\": \"moo-moo, moo-moo, moo-moo\"\n}");
     }
 
     //создание уточки
@@ -69,30 +66,22 @@ public class DuckActionQuackTests extends TestNGCitrusSpringSupport {
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .extract(fromBody().expression("$.id", "duckId")));
 
-        runner.run(new AbstractTestAction() {
-            @Override
-            public void doExecute(TestContext context) {
-                idDuck[0] = context.getVariable("duckId");
-            }
-        });
+        runner.$(context -> idDuck[0] = context.getVariable("duckId"));
 
         return idDuck[0];
     }
 
-    //Проверка, что id четный
-    public boolean checkIdEven(String idDuck) {
-        return Integer.parseInt(idDuck) % 2 == 0;
-    }
-
     //создание утки с необходимым id (четным или нечетным)
     //desiredReminderOfDivision = true -> необходимо четное значение id, desiredReminderOfDivision = false -> нечетное значение id
-    public String[] createDuckIdEvenOrOdd(TestCaseRunner runner, boolean desiredReminderOfDivision) {
+    public String createDuckIdEvenOrOdd(TestCaseRunner runner, boolean desiredReminderOfDivision) {
+        String idDuck;
+
         do {
             createDuck(runner, "yellow", 0.03, "rubber", "quack", "ACTIVE");
             idDuck = getIdCreatedDuck(runner);
-        } while (checkIdEven(idDuck) != desiredReminderOfDivision);
+        } while (Integer.parseInt(idDuck) % 2 == 0 != desiredReminderOfDivision);
 
-        return new String[]{idDuck, "quack"};
+        return idDuck;
     }
 
     //Запрос - крякать
@@ -105,30 +94,6 @@ public class DuckActionQuackTests extends TestNGCitrusSpringSupport {
                         .queryParam("id", idDuck)
                         .queryParam("repetitionCount", String.valueOf(repetitionCount))
                         .queryParam("soundCount", String.valueOf(soundCount)));
-    }
-
-    //Генерация одиночного звука утки
-    public String generationSingleDuckSound(String soundDuck, int repetitionCount) {
-        StringBuilder singleDuckSoundBuilder = new StringBuilder();
-
-        for (int i = 0; i < repetitionCount; i++) {
-            if (i > 0) singleDuckSoundBuilder.append("-");
-            singleDuckSoundBuilder.append(soundDuck);
-        }
-
-        return singleDuckSoundBuilder.toString();
-    }
-
-    //Генерация кряканья утки текстом
-    public String expectedMessage(String soundDuck, int repetitionCount, int soundCount) {
-        StringBuilder expectedBuilder = new StringBuilder();
-
-        for (int i = 0; i < soundCount; i++) {
-            if (i > 0) expectedBuilder.append(", ");
-            expectedBuilder.append(generationSingleDuckSound(soundDuck, repetitionCount));
-        }
-
-        return expectedBuilder.toString();
     }
 
     //валидация ответа

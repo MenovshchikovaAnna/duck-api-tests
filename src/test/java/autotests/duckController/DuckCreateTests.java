@@ -19,14 +19,14 @@ public class DuckCreateTests extends TestNGCitrusSpringSupport {
     @CitrusTest
     public void createDuckMaterialRubber(@Optional @CitrusResource TestCaseRunner runner) {
         createDuck(runner, "yellow", 0.03, "rubber", "quack", "ACTIVE");
-        validateResponseActiveWingsFly(runner, "yellow", 0.03, "rubber", "quack", "ACTIVE");
+        validateResponseDelete(runner, "yellow", 0.03, "rubber", "quack", "ACTIVE");
     }
 
     @Test(description = "Проверка создания уточки с материалом wood")
     @CitrusTest
     public void createDuckMaterialWood(@Optional @CitrusResource TestCaseRunner runner) {
         createDuck(runner, "yellow", 0.03, "wood", "quack", "ACTIVE");
-        validateResponseActiveWingsFly(runner, "yellow", 0.03, "wood", "quack", "ACTIVE");
+        validateResponseDelete(runner, "yellow", 0.03, "wood", "quack", "ACTIVE");
     }
 
     //создание уточки
@@ -47,7 +47,7 @@ public class DuckCreateTests extends TestNGCitrusSpringSupport {
     }
 
     //валидация ответа
-    public void validateResponseActiveWingsFly(TestCaseRunner runner, String expectedColor, double expectedHeight, String expectedMaterial, String expectedSound, String expectedWingsState) {
+    public void validateResponseDelete(TestCaseRunner runner, String expectedColor, double expectedHeight, String expectedMaterial, String expectedSound, String expectedWingsState) {
         runner.$(
                 http()
                         .client(url)
@@ -57,6 +57,10 @@ public class DuckCreateTests extends TestNGCitrusSpringSupport {
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .validate(jsonPath()
                                 .expression("$.id", "@isNumber()@")
+                                .expression("$.id", "@greaterThan(0)@")      // 2. Положительное число
+                                .expression("$.id", "@notEmpty()@")
+                                .expression("$.id", "@notNull()@")
+
                                 .expression("$.color", expectedColor)
                                 .expression("$.height", String.valueOf(expectedHeight))
                                 .expression("$.material", expectedMaterial)
