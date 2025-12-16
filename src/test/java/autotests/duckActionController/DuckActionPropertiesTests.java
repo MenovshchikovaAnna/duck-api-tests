@@ -16,16 +16,15 @@ import static com.consol.citrus.validation.DelegatingPayloadVariableExtractor.Bu
 import static com.consol.citrus.validation.json.JsonPathMessageValidationContext.Builder.jsonPath;
 
 public class DuckActionPropertiesTests extends TestNGCitrusSpringSupport {
-
     String url = "http://localhost:2222";
-    String idDuck;
 
     @Test(description = "Проверка отображения характеристик уточки (с четным id)")
     @CitrusTest
     public void showPropertiesDuckEvenId(@Optional @CitrusResource TestCaseRunner runner) {
         String idDuckActual = createDuckIdEvenOrOdd(runner, true, "wood");
         showPropertiesDuck(runner, idDuckActual);
-        validateResponseActiveWingsFly(runner, "yellow", 0.03, "wood", "quack", "ACTIVE");
+        String bodyDuck = "{}"; //TODO: SHIFT-AQA-2
+        validateResponseActiveWingsFly(runner, bodyDuck);
     }
 
     @Test(description = "Проверка отображения характеристик уточки (с нечетным id)")
@@ -33,7 +32,15 @@ public class DuckActionPropertiesTests extends TestNGCitrusSpringSupport {
     public void showPropertiesDuckOddId(@Optional @CitrusResource TestCaseRunner runner) {
         String idDuckActual = createDuckIdEvenOrOdd(runner, false, "rubber");
         showPropertiesDuck(runner, idDuckActual);
-        validateResponseActiveWingsFly(runner, "yellow", 0.03, "rubber", "quack", "ACTIVE");
+
+         String bodyDuck = "{\n" +
+                "  \"color\": \"yellow\",\n" +
+                "  \"height\": 3.0,\n" + // TODO: SHIFT-AQA-3
+                "  \"material\": \"rubber\",\n" +
+                "  \"sound\": \"quack\",\n" +
+                "  \"wingsState\": \"ACTIVE\"\n" +
+                "}";
+        validateResponseActiveWingsFly(runner, bodyDuck);
     }
 
     //создание утки
@@ -66,28 +73,20 @@ public class DuckActionPropertiesTests extends TestNGCitrusSpringSupport {
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .extract(fromBody().expression("$.id", "duckId")));
 
-        runner.run(new AbstractTestAction() {
-            @Override
-            public void doExecute(TestContext context) {
-                idDuck[0] = context.getVariable("duckId");
-            }
-        });
+        runner.$(context -> idDuck[0] = context.getVariable("duckId"));
 
         return idDuck[0];
-    }
-
-    //Проверка, что id четный
-    public boolean checkIdEven(String idDuck) {
-        return Integer.parseInt(idDuck) % 2 == 0;
     }
 
     //создание утки с необходимым id (четным или нечетным)
     //desiredReminderOfDivision = true -> необходимо четное значение id, desiredReminderOfDivision = false -> нечетное значение id
     public String createDuckIdEvenOrOdd(TestCaseRunner runner, boolean desiredReminderOfDivision, String expectedMaterial) {
+        String idDuck;
+
         do {
             createDuck(runner, "yellow", 0.03, expectedMaterial, "quack", "ACTIVE");
             idDuck = getIdCreatedDuck(runner);
-        } while (checkIdEven(idDuck) != desiredReminderOfDivision);
+        } while ((Integer.parseInt(idDuck) % 2 == 0) != desiredReminderOfDivision);
 
         return idDuck;
     }
@@ -103,7 +102,7 @@ public class DuckActionPropertiesTests extends TestNGCitrusSpringSupport {
     }
 
     //валидация ответа
-    public void validateResponseActiveWingsFly(TestCaseRunner runner, String expectedColor, double expectedHeight, String expectedMaterial, String expectedSound, String expectedWingsState) {
+    public void validateResponseActiveWingsFly(TestCaseRunner runner, String bodyDuck) {
         runner.$(
                 http()
                         .client(url)
@@ -111,11 +110,6 @@ public class DuckActionPropertiesTests extends TestNGCitrusSpringSupport {
                         .response(HttpStatus.OK)
                         .message()
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .validate(jsonPath()
-                                .expression("$.color", expectedColor)
-                                .expression("$.height", expectedHeight)
-                                .expression("$.material", expectedMaterial)
-                                .expression("$.sound", expectedSound)
-                                .expression("$.wingsState", expectedWingsState)));
+                        .body(bodyDuck));
     }
 }

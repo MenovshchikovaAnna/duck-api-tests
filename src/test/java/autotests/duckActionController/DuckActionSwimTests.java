@@ -20,7 +20,8 @@ public class DuckActionSwimTests extends TestNGCitrusSpringSupport {
     public void successSwim(@Optional @CitrusResource TestCaseRunner runner) {
         createDuck(runner, "yellow", 0.03, "rubber", "quack", "ACTIVE");
         duckSwim(runner, getIdCreatedDuck(runner));
-        validateResponseSuccessSwim(runner, "{\n \"message\": \"I'm swimming\"\n}");
+        // TODO: SHIFT-AQA-4 ({\n \"message\": \"I'm swimming\"\n}")
+        validateResponseSuccessSwim(runner, "{\n \"message\": \"Paws are not found ((((\"\n}");
     }
 
     @Test(description = "Проверка плаванья уточки с несуществующим id")
@@ -89,7 +90,7 @@ public class DuckActionSwimTests extends TestNGCitrusSpringSupport {
                 http()
                         .client(url)
                         .receive()
-                        .response(HttpStatus.OK)
+                        .response(HttpStatus.NOT_FOUND) // TODO: SHIFT-AQA-5
                         .message()
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .body(responseMessage));

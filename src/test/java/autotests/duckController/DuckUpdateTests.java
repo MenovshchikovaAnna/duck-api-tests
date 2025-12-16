@@ -14,11 +14,12 @@ import static com.consol.citrus.validation.DelegatingPayloadVariableExtractor.Bu
 
 public class DuckUpdateTests extends TestNGCitrusSpringSupport {
     String url = "http://localhost:2222";
-    String idDuck;
 
     @Test(description = "Проверка изменения параметров уточки (color и height)")
     @CitrusTest
     public void updateDuckParametersColorHeight(@Optional @CitrusResource TestCaseRunner runner) {
+        String idDuck;
+
         createDuck(runner, "yellow", 0.03, "rubber", "quack", "ACTIVE");
         idDuck = getIdCreatedDuck(runner);
         updateDuck(runner, idDuck, "red", 0.05, "rubber", "quack", "ACTIVE");
@@ -28,6 +29,8 @@ public class DuckUpdateTests extends TestNGCitrusSpringSupport {
     @Test(description = "Проверка изменения параметров уточки (color и sound)")
     @CitrusTest
     public void updateDuckParametersColorSound(@Optional @CitrusResource TestCaseRunner runner) {
+        String idDuck;
+
         createDuck(runner, "yellow", 0.03, "rubber", "quack", "ACTIVE");
         idDuck = getIdCreatedDuck(runner);
         updateDuck(runner, idDuck, "blue", 0.05, "rubber", "quack-quack", "ACTIVE");
