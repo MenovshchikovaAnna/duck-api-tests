@@ -18,7 +18,8 @@ dependencies {
 
     testImplementation group: 'org.slf4j', name: 'slf4j-reload4j', version: '2.0.7'
 
-    testImplementation group: 'org.projectlombok', name: 'lombok', version: '1.18.28'
+    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.28'
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.28'
 }
 
 test {

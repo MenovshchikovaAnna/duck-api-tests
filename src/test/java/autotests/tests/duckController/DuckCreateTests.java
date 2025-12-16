@@ -1,5 +1,7 @@
-package autotests.duckController;
+package autotests.tests.duckController;
 
+import autotests.clients.DuckActionsClient;
+import autotests.payloads.BodyCreateDuck;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
@@ -12,52 +14,47 @@ import org.testng.annotations.Test;
 import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 import static com.consol.citrus.validation.json.JsonPathMessageValidationContext.Builder.jsonPath;
 
-public class DuckCreateTests extends TestNGCitrusSpringSupport {
-    String url = "http://localhost:2222";
-
+public class DuckCreateTests extends DuckActionsClient {
     @Test(description = "Проверка создания уточки с материалом rubber")
     @CitrusTest
     public void createDuckMaterialRubber(@Optional @CitrusResource TestCaseRunner runner) {
-        createDuck(runner, "yellow", 0.03, "rubber", "quack", "ACTIVE");
-        validateResponseDelete(runner, "yellow", 0.03, "rubber", "quack", "ACTIVE");
+        BodyCreateDuck duckProperties = new BodyCreateDuck()
+                .color("yellow")
+                .height(0.03)
+                .material("rubber")
+                .sound("quack")
+                .wingsState(BodyCreateDuck.WingsState.ACTIVE);
+
+        createDuck(runner, duckProperties);
+        validateResponse(runner, "yellow", 0.03, "rubber", "quack", "ACTIVE");
     }
 
     @Test(description = "Проверка создания уточки с материалом wood")
     @CitrusTest
     public void createDuckMaterialWood(@Optional @CitrusResource TestCaseRunner runner) {
-        createDuck(runner, "yellow", 0.03, "wood", "quack", "ACTIVE");
-        validateResponseDelete(runner, "yellow", 0.03, "wood", "quack", "ACTIVE");
+        BodyCreateDuck duckProperties = new BodyCreateDuck()
+                .color("yellow")
+                .height(0.03)
+                .material("wood")
+                .sound("quack")
+                .wingsState(BodyCreateDuck.WingsState.ACTIVE);
+
+        createDuck(runner, duckProperties);
+        validateResponse(runner, "yellow", 0.03, "wood", "quack", "ACTIVE");
     }
 
-    //создание уточки
-    public void createDuck(TestCaseRunner runner, String color, double height, String material, String sound, String wingsState) {
+    //валидация ответа для create (отличается от остальных, поэтому отдельно и private)
+    private void validateResponse(TestCaseRunner runner, String expectedColor, double expectedHeight, String expectedMaterial, String expectedSound, String expectedWingsState) {
         runner.$(
                 http()
-                        .client(url)
-                        .send()
-                        .post("/api/duck/create")
-                        .message()
-                        .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .body("{\n" +
-                                "\"color\": \"" + color + "\",\n" +
-                                "\"height\": " + height + ",\n" +
-                                "\"material\": \"" + material + "\",\n" +
-                                "\"sound\": \"" + sound + "\",\n" +
-                                "\"wingsState\": \"" + wingsState + "\"}"));
-    }
-
-    //валидация ответа
-    public void validateResponseDelete(TestCaseRunner runner, String expectedColor, double expectedHeight, String expectedMaterial, String expectedSound, String expectedWingsState) {
-        runner.$(
-                http()
-                        .client(url)
+                        .client(duckService)
                         .receive()
                         .response(HttpStatus.OK)
                         .message()
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .validate(jsonPath()
                                 .expression("$.id", "@isNumber()@")
-                                .expression("$.id", "@greaterThan(0)@")      // 2. Положительное число
+                                .expression("$.id", "@greaterThan(0)@")
                                 .expression("$.id", "@notEmpty()@")
                                 .expression("$.id", "@notNull()@")
 
