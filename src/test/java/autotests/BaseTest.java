@@ -26,11 +26,6 @@ public class BaseTest extends TestNGCitrusSpringSupport {
     @Autowired
     protected SingleConnectionDataSource testDb;
 
-    public void databaseUpdate(TestCaseRunner runner, String sql) {
-        runner.$(sql(testDb)
-                .statement(sql));
-    }
-
     protected void getRequest(TestCaseRunner runner, HttpClient url, String path, Map<String, Object> queryParams) {
         HttpClientRequestActionBuilder builder = http()
                 .client(url)
@@ -44,21 +39,14 @@ public class BaseTest extends TestNGCitrusSpringSupport {
         runner.$(builder);
     }
 
-    protected void putRequest(TestCaseRunner runner, HttpClient url, String path, Object... queryParams) {
-        if (queryParams.length % 2 != 0) {
-            throw new IllegalArgumentException("Query параметров должно быть четное количество");
-        }
-
+    protected void putRequest(TestCaseRunner runner, HttpClient url, String path, Map<String, Object> queryParams) {
         HttpClientRequestActionBuilder builder = http()
                 .client(url)
                 .send()
                 .put(path);
 
-        for (int i = 0; i < queryParams.length; i += 2) {
-            builder.queryParam(
-                    queryParams[i].toString(),
-                    queryParams[i + 1].toString()
-            );
+        for (Map.Entry <String, Object> qp : queryParams.entrySet()) {
+            builder.queryParam(qp.getKey(), qp.getValue().toString());
         }
 
         runner.$(builder);
@@ -120,20 +108,19 @@ public class BaseTest extends TestNGCitrusSpringSupport {
         }
     }
 
+    protected void databaseUpdate(TestCaseRunner runner, String sql) {
+        runner.$(sql(testDb)
+                .statement(sql));
+    }
+
     protected void deleteFromTable(TestCaseRunner runner, String tableName, String condition) {
         runner.$(doFinally().actions(context ->
                 databaseUpdate(runner, "DELETE FROM " + tableName + " WHERE " + condition)));
     }
 
-    protected void insertIntoTable(TestCaseRunner runner, String nameTable, String paramethers, String values) {
-        databaseUpdate(runner, "insert into " + nameTable + " (" + paramethers + ")\n" +
+    protected void insertIntoTable(TestCaseRunner runner, String nameTable, String parameters, String values) {
+        databaseUpdate(runner, "insert into " + nameTable + " (" + parameters + ")\n" +
                 "values (" +
                 values + "')");
-    }
-
-    protected String selectFromTable(TestCaseRunner runner, String columnsName, String tableName, String conditions) {
-        return "SELECT " + columnsName +
-                " FROM " + tableName +
-                " WHERE " + conditions;
     }
 }

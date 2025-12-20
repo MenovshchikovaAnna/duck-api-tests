@@ -60,9 +60,6 @@ public class DuckCreateTests extends DuckActionsClient {
     public void successfulCreateDuck(BodyCreateDuck payload, String response, @Optional @CitrusResource TestCaseRunner runner) {
         createDuck(runner, payload);
         String idDuck = validateResponseCreate(runner, response);
-        deleteFromTable(runner,
-                "DUCK",
-                "ID = " + idDuck);
 
         selectCheckingDuckById(runner,
                 idDuck,
@@ -71,6 +68,10 @@ public class DuckCreateTests extends DuckActionsClient {
                 payload.material(),
                 payload.sound(),
                 payload.wingsState().name());
+
+        deleteFromTable(runner,
+                "DUCK",
+                "ID = " + idDuck);
     }
 
     @DataProvider(name = "duckList")

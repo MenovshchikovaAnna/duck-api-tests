@@ -1,7 +1,7 @@
 package autotests.clients;
 
-import autotests.payloads.BodyCreateDuck;
 import autotests.BaseTest;
+import autotests.payloads.BodyCreateDuck;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.message.builder.ObjectMappingPayloadBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,15 +42,18 @@ public class DuckActionsClient extends BaseTest {
 
     @Step("Обновляем характеристики уточки")
     public void updateDuck(TestCaseRunner runner, String idDuck, String changeableColor, double changeableHeight, String changeableMaterial, String changeableSound, String changeableWingsState) {
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("id", idDuck);
+        queryParams.put("color", changeableColor);
+        queryParams.put("height", String.valueOf(changeableHeight));
+        queryParams.put("material", changeableMaterial);
+        queryParams.put("sound", changeableSound);
+        queryParams.put("wingsState", changeableWingsState);
+
         putRequest(runner,
                 duckService,
                 "/api/duck/update",
-                "id", idDuck,
-                "color", changeableColor,
-                "height", String.valueOf(changeableHeight),
-                "material", changeableMaterial,
-                "sound", changeableSound,
-                "wingsState", changeableWingsState);
+                queryParams);
     }
 
     @Step("Удаляем уточку")
@@ -94,7 +97,7 @@ public class DuckActionsClient extends BaseTest {
                 queryParams);
     }
 
-    //Валидация ответа String
+    @Step("Валидация ответа String")
     public void validateResponseString(TestCaseRunner runner, HttpStatus expectedStatus, String responseMessage) {
         responseRequest(runner,
                 duckService,
@@ -103,7 +106,7 @@ public class DuckActionsClient extends BaseTest {
                 responseMessage);
     }
 
-    //Валидация ответа Resourses
+    @Step("Валидация ответа Resourses")
     public void validateResponseResourses(TestCaseRunner runner, HttpStatus expectedStatus, String resourcePath) {
         responseRequest(runner,
                 duckService,
@@ -112,7 +115,7 @@ public class DuckActionsClient extends BaseTest {
                 new ClassPathResource(resourcePath));
     }
 
-    //Валидация ответа Payload
+    @Step("Валидация ответа Payload")
     public void validateResponsePayload(TestCaseRunner runner, HttpStatus expectedStatus, Object expectedResponse) {
         responseRequest(runner,
                 duckService,
@@ -121,7 +124,7 @@ public class DuckActionsClient extends BaseTest {
                 new ObjectMappingPayloadBuilder(expectedResponse, new ObjectMapper()));
     }
 
-    //Создание утки с помощью SQL запросов к БД
+    @Step("Создание утки с помощью SQL запросов к БД")
     public void createDuckWithDatabase(TestCaseRunner runner, BodyCreateDuck duckProperties, String duckId) {
         deleteFromTable(runner,
                 "DUCK",
@@ -144,7 +147,7 @@ public class DuckActionsClient extends BaseTest {
         }
     }
 
-    //Проверка, что уточка действительно создалась в БД
+    @Step("Проверка, что уточка действительно создалась в БД")
     public void selectCheckingDuckById(TestCaseRunner runner, String idDuck, String exceptColor, double exceptHeight, String exceptMaterial, String exceptSound, String exceptWingsState) {
 
         String conditions = "ID = " + idDuck +
@@ -154,10 +157,9 @@ public class DuckActionsClient extends BaseTest {
                 "' AND SOUND = '" + exceptSound +
                 "' AND WINGS_STATE = '" + exceptWingsState + "'";
 
-        String sqlSelect = selectFromTable(runner,
-                "id, color, height, material, sound, wings_state",
-                "DUCK",
-                conditions);
+        String sqlSelect = "SELECT id " +
+                "FROM DUCK " +
+                "WHERE " + conditions;
 
         runner.$(
                 query(testDb)
@@ -166,5 +168,20 @@ public class DuckActionsClient extends BaseTest {
         );
 
         runner.$(echo("Утка с ID = " + idDuck + " найдена в БД"));
+    }
+
+    @Step("Проверка, что уточка действительно удалена из БД")
+    public void selectVerifyDuckNotInDatabase(TestCaseRunner runner, String idDuck) {
+        String sqlSelect = "SELECT COUNT(*) AS count " +
+                "FROM DUCK " +
+                "WHERE ID = " + idDuck;
+
+        runner.$(
+                query(testDb)
+                        .statement(sqlSelect)
+                        .validate("count", "0")
+        );
+
+        runner.$(echo("Утка с ID = " + idDuck + " успешно удалена из БД"));
     }
 }
