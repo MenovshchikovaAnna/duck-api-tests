@@ -1,0 +1,8 @@
+{
+  "id": "@ignore@",
+  "color": "green",
+  "height": 0.05,
+  "material": "wood",
+  "sound": "quack-quack",
+  "wingsState": "FIXED"
+}

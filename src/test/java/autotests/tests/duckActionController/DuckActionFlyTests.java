@@ -6,10 +6,16 @@ import autotests.payloads.ResponseMessageDuck;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.springframework.http.HttpStatus;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
+@Epic("Тесты на duck-actions-controller")
+@Feature("Полет уточки")
+@Story("Эндпоинт /api/duck/action/fly")
 public class DuckActionFlyTests extends DuckActionsClient {
     @Test(description = "Проверка полета уточки с крыльями Active")
     @CitrusTest
@@ -21,11 +27,15 @@ public class DuckActionFlyTests extends DuckActionsClient {
                 .sound("quack")
                 .wingsState(BodyCreateDuck.WingsState.ACTIVE);
 
-        createDuck(runner, duckProperties);
-        duckFly(runner, getId(runner));
-        validateResponseString(runner, HttpStatus.OK, "{\n \"message\": \"I am flying :)\"\n}");
-    }
+        String idDuck = "1234567";
+        createDuckWithDatabase(runner, duckProperties, idDuck);
+        duckFly(runner, idDuck);
 
+        ResponseMessageDuck expectedResponse = new ResponseMessageDuck()
+                .message("I am flying :)");
+
+        validateResponsePayload(runner, HttpStatus.OK, expectedResponse);
+    }
 
     @Test(description = "Проверка полета уточки с крыльями Fixed")
     @CitrusTest
@@ -37,8 +47,9 @@ public class DuckActionFlyTests extends DuckActionsClient {
                 .sound("quack")
                 .wingsState(BodyCreateDuck.WingsState.FIXED);
 
-        createDuck(runner, duckProperties);
-        duckFly(runner, getId(runner));
+        String idDuck = "1234567";
+        createDuckWithDatabase(runner, duckProperties, idDuck);
+        duckFly(runner, idDuck);
 
         ResponseMessageDuck expectedResponse = new ResponseMessageDuck()
                 .message("I can not fly :C");
@@ -56,8 +67,9 @@ public class DuckActionFlyTests extends DuckActionsClient {
                 .sound("quack")
                 .wingsState(BodyCreateDuck.WingsState.UNDEFINED);
 
-        createDuck(runner, duckProperties);
-        duckFly(runner, getId(runner));
+        String idDuck = "1234567";
+        createDuckWithDatabase(runner, duckProperties, idDuck);
+        duckFly(runner, idDuck);
 
         ResponseMessageDuck expectedResponse = new ResponseMessageDuck()
                 .message("Wings are not detected :(");
